@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>星露谷邀请码</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #eaf1ee;
+    padding: 16px;
+    font-family: -apple-system, "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif;
+  }
+  .card {
+    background: #ffffff;
+    border: 1px solid #d9e2dd;
+    border-radius: 16px;
+    padding: clamp(28px, 7vw, 52px) clamp(20px, 8vw, 72px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: clamp(22px, 5vw, 34px);
+    max-width: 600px;
+    width: 100%;
+  }
+  .code {
+    font-family: "SF Mono", "Cascadia Mono", Consolas, Menlo, monospace;
+    font-size: clamp(1.7rem, 7.5vw, 2.9rem);
+    font-weight: 700;
+    letter-spacing: .12em;
+    color: #204051;
+    text-align: center;
+    word-break: break-all;
+    user-select: all;
+    -webkit-user-select: all;
+    padding: 4px 8px;
+    border-radius: 8px;
+  }
+  .code.flash { animation: flash 1.2s ease-out; }
+  @keyframes flash {
+    from { background: #fdeeda; }
+    to   { background: transparent; }
+  }
+  #copyBtn {
+    font-size: clamp(1rem, 3.5vw, 1.15rem);
+    padding: .8em 2.6em;
+    border: none;
+    border-radius: 10px;
+    background: #2a9d8f;
+    color: #ffffff;
+    cursor: pointer;
+    transition: background .15s ease;
+    touch-action: manipulation;
+  }
+  #copyBtn:hover { background: #24887b; }
+  #copyBtn:active { background: #1f7268; }
+  #copyBtn.copied { background: #e76f51; }
+</style>
+</head>
+<body>
+<main class="card">
+  <div id="code" class="code">加载中…</div>
+  <button id="copyBtn" type="button">复制邀请码</button>
+</main>
+<script>
+(function () {
+  var codeEl = document.getElementById('code');
+  var btn = document.getElementById('copyBtn');
+  var current = '';
+
+  function refresh() {
+    fetch('invite-code.txt?ts=' + Date.now(), { cache: 'no-store' })
+      .then(function (r) {
+        if (!r.ok) throw new Error('http ' + r.status);
+        return r.text();
+      })
+      .then(function (t) {
+        t = (t || '').trim();
+        if (t && t !== current) {
+          current = t;
+          codeEl.textContent = t;
+          codeEl.classList.remove('flash');
+          void codeEl.offsetWidth; /* 重启动画 */
+          codeEl.classList.add('flash');
+        }
+      })
+      .catch(function () {
+        if (!current) codeEl.textContent = '获取失败，稍后自动重试';
+      });
+  }
+
+  function copyText(t) {
+    if (navigator.clipboard && window.isSecureContext) {
+      return navigator.clipboard.writeText(t).then(function () { return true; }, function () { return legacyCopy(t); });
+    }
+    return Promise.resolve(legacyCopy(t));
+  }
+
+  function legacyCopy(t) {
+    var ta = document.createElement('textarea');
+    ta.value = t;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.focus();
+    ta.select();
+    var ok = false;
+    try { ok = document.execCommand('copy'); } catch (e) {}
+    document.body.removeChild(ta);
+    return ok;
+  }
+
+  btn.addEventListener('click', function () {
+    if (!current) return;
+    copyText(current).then(function (ok) {
+      var old = '复制邀请码';
+      btn.textContent = ok ? '已复制 ✓' : '复制失败，请长按手动复制';
+      btn.classList.add('copied');
+      setTimeout(function () {
+        btn.textContent = old;
+        btn.classList.remove('copied');
+      }, 2000);
+    });
+  });
+
+  refresh();
+  setInterval(refresh, 60000);
+})();
+</script>
+</body>
+</html>
