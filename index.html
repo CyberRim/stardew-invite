@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>星露谷邀请码</title>
+<title>星露谷联机</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   html, body { height: 100%; }
@@ -20,14 +20,40 @@
     background: #ffffff;
     border: 1px solid #d9e2dd;
     border-radius: 16px;
-    padding: clamp(28px, 7vw, 52px) clamp(20px, 8vw, 72px);
+    padding: clamp(20px, 5vw, 40px) clamp(20px, 8vw, 72px) clamp(28px, 7vw, 52px);
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: clamp(22px, 5vw, 34px);
+    gap: clamp(18px, 4vw, 28px);
     max-width: 600px;
     width: 100%;
   }
+  .tabs {
+    display: flex;
+    gap: 8px;
+    width: 100%;
+    border-bottom: 2px solid #e3ebe7;
+  }
+  .tab {
+    flex: 1;
+    padding: 10px 0 12px;
+    font-size: clamp(1rem, 3.5vw, 1.1rem);
+    color: #6b7f77;
+    background: none;
+    border: none;
+    border-bottom: 3px solid transparent;
+    margin-bottom: -2px;
+    cursor: pointer;
+    transition: color .15s ease, border-color .15s ease;
+    touch-action: manipulation;
+  }
+  .tab.active {
+    color: #204051;
+    font-weight: 700;
+    border-bottom-color: #2a9d8f;
+  }
+  .panel { display: none; width: 100%; flex-direction: column; align-items: center; gap: clamp(18px, 4vw, 26px); }
+  .panel.active { display: flex; }
   .code {
     font-family: "SF Mono", "Cascadia Mono", Consolas, Menlo, monospace;
     font-size: clamp(1.7rem, 7.5vw, 2.9rem);
@@ -42,11 +68,24 @@
     border-radius: 8px;
   }
   .code.flash { animation: flash 1.2s ease-out; }
+  .code.unavailable {
+    font-size: clamp(1rem, 4vw, 1.3rem);
+    letter-spacing: normal;
+    font-weight: 500;
+    color: #8a6d3b;
+  }
   @keyframes flash {
     from { background: #fdeeda; }
     to   { background: transparent; }
   }
-  #copyBtn {
+  .hint {
+    font-size: .92rem;
+    color: #6b7f77;
+    text-align: center;
+    line-height: 1.6;
+  }
+  .btn {
+    display: inline-block;
     font-size: clamp(1rem, 3.5vw, 1.15rem);
     padding: .8em 2.6em;
     border: none;
@@ -56,42 +95,161 @@
     cursor: pointer;
     transition: background .15s ease;
     touch-action: manipulation;
+    text-decoration: none;
+    text-align: center;
   }
-  #copyBtn:hover { background: #24887b; }
-  #copyBtn:active { background: #1f7268; }
-  #copyBtn.copied { background: #e76f51; }
+  .btn:hover { background: #24887b; }
+  .btn:active { background: #1f7268; }
+  .btn.copied { background: #e76f51; }
+  .btn.secondary {
+    background: #eef4f1;
+    color: #204051;
+    border: 1px solid #cfddd6;
+    font-size: .95rem;
+    padding: .6em 1.6em;
+  }
+  .btn.secondary:hover { background: #e0eae5; }
+  .fallback {
+    width: 100%;
+    border-top: 1px dashed #d9e2dd;
+    padding-top: 14px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+  .fallback summary {
+    cursor: pointer;
+    color: #6b7f77;
+    font-size: .92rem;
+    user-select: none;
+  }
+  .fallback .row { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+  #joinMain {
+    width: 100%;
+    flex-direction: column;
+    align-items: center;
+    gap: clamp(18px, 4vw, 26px);
+  }
 </style>
 </head>
 <body>
 <main class="card">
-  <div id="code" class="code">加载中…</div>
-  <button id="copyBtn" type="button">复制邀请码</button>
+  <nav class="tabs">
+    <button id="tabCode" class="tab active" type="button">邀请码</button>
+    <button id="tabJoin" class="tab" type="button">一键加入</button>
+  </nav>
+
+  <section id="panelCode" class="panel active">
+    <div id="code" class="code">加载中…</div>
+    <button id="copyBtn" class="btn" type="button">复制邀请码</button>
+    <p class="hint">在游戏中：合作 → 加入 → 输入邀请码</p>
+  </section>
+
+  <section id="panelJoin" class="panel">
+    <div id="joinMain" style="display:none;">
+      <a id="joinBtn" class="btn" href="#">一键加入游戏（Steam）</a>
+      <p class="hint">点击后浏览器会请求打开 Steam，确认即可直接进入服务器。<br>需要 PC 已安装并登录 Steam。</p>
+      <details class="fallback">
+        <summary>点击没反应？</summary>
+        <p class="hint">未安装 Steam 或浏览器拦截了链接时，可改用以下方式：</p>
+        <div class="row">
+          <button id="copyLinkBtn" class="btn secondary" type="button">复制加入链接</button>
+          <button id="copyCmdBtn" class="btn secondary" type="button">复制启动命令</button>
+        </div>
+        <p class="hint">启动命令用法：Steam → 右键 Stardew Valley → 属性 → 启动选项，粘贴后启动游戏（进入后可清除）。</p>
+      </details>
+    </div>
+    <p id="joinMobile" class="hint" style="display:none;">手机 / 平板无法使用一键加入。<br>请改用「邀请码」标签页，或用 PC 版 Steam 打开本页。</p>
+    <p id="joinUnavailable" class="hint" style="display:none;">服务器联机入口暂不可用，请稍后再试。</p>
+  </section>
 </main>
 <script>
 (function () {
+  var tabCode = document.getElementById('tabCode');
+  var tabJoin = document.getElementById('tabJoin');
+  var panelCode = document.getElementById('panelCode');
+  var panelJoin = document.getElementById('panelJoin');
   var codeEl = document.getElementById('code');
-  var btn = document.getElementById('copyBtn');
-  var current = '';
+  var copyBtn = document.getElementById('copyBtn');
+  var joinMain = document.getElementById('joinMain');
+  var joinBtn = document.getElementById('joinBtn');
+  var joinMobile = document.getElementById('joinMobile');
+  var joinUnavailable = document.getElementById('joinUnavailable');
+  var copyLinkBtn = document.getElementById('copyLinkBtn');
+  var copyCmdBtn = document.getElementById('copyCmdBtn');
 
-  function refresh() {
-    fetch('invite-code.txt?ts=' + Date.now(), { cache: 'no-store' })
+  var currentCode = '';
+  var currentJoinUri = '';
+  var isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+
+  function switchTab(join) {
+    tabCode.classList.toggle('active', !join);
+    tabJoin.classList.toggle('active', join);
+    panelCode.classList.toggle('active', !join);
+    panelJoin.classList.toggle('active', join);
+    if (location.hash !== (join ? '#join' : '#code')) {
+      history.replaceState(null, '', join ? '#join' : '#code');
+    }
+  }
+
+  tabCode.addEventListener('click', function () { switchTab(false); });
+  tabJoin.addEventListener('click', function () { switchTab(true); });
+  switchTab(location.hash === '#join');
+
+  function fetchText(name, cb) {
+    fetch(name + '?ts=' + Date.now(), { cache: 'no-store' })
       .then(function (r) {
         if (!r.ok) throw new Error('http ' + r.status);
         return r.text();
       })
-      .then(function (t) {
-        t = (t || '').trim();
-        if (t && t !== current) {
-          current = t;
-          codeEl.textContent = t;
-          codeEl.classList.remove('flash');
-          void codeEl.offsetWidth; /* 重启动画 */
-          codeEl.classList.add('flash');
-        }
-      })
-      .catch(function () {
-        if (!current) codeEl.textContent = '获取失败，稍后自动重试';
-      });
+      .then(function (t) { cb((t || '').trim()); })
+      .catch(function () { cb(null); });
+  }
+
+  function renderCode(t) {
+    if (t === null) {
+      if (!currentCode && !codeEl.classList.contains('unavailable')) {
+        codeEl.textContent = '获取失败，稍后自动重试';
+      }
+      return;
+    }
+    if (t === currentCode) return;
+    currentCode = t;
+    codeEl.classList.remove('flash');
+    void codeEl.offsetWidth;
+    if (t) {
+      codeEl.classList.remove('unavailable');
+      codeEl.textContent = t;
+      copyBtn.style.display = '';
+    } else {
+      codeEl.classList.add('unavailable');
+      codeEl.textContent = '邀请码暂不可用，请改用「一键加入」';
+      copyBtn.style.display = 'none';
+    }
+    codeEl.classList.add('flash');
+  }
+
+  function renderJoin(t) {
+    if (t === null) return;
+    if (t === currentJoinUri) return;
+    currentJoinUri = t;
+    joinMain.style.display = 'none';
+    joinMobile.style.display = 'none';
+    joinUnavailable.style.display = 'none';
+    if (!t) {
+      joinUnavailable.style.display = '';
+    } else if (isMobile) {
+      joinMobile.style.display = '';
+    } else {
+      joinBtn.href = t;
+      joinMain.style.display = 'flex';
+    }
+  }
+
+  function refresh() {
+    fetchText('invite-code.txt', renderCode);
+    fetchText('steam-join.txt', renderJoin);
   }
 
   function copyText(t) {
@@ -115,17 +273,31 @@
     return ok;
   }
 
-  btn.addEventListener('click', function () {
-    if (!current) return;
-    copyText(current).then(function (ok) {
-      var old = '复制邀请码';
-      btn.textContent = ok ? '已复制 ✓' : '复制失败，请长按手动复制';
-      btn.classList.add('copied');
-      setTimeout(function () {
-        btn.textContent = old;
-        btn.classList.remove('copied');
-      }, 2000);
+  function bindCopy(btn, label, getText) {
+    btn.addEventListener('click', function () {
+      var t = getText();
+      if (!t) return;
+      copyText(t).then(function (ok) {
+        btn.textContent = ok ? '已复制 ✓' : '复制失败，请手动复制';
+        btn.classList.add('copied');
+        setTimeout(function () {
+          btn.textContent = label;
+          btn.classList.remove('copied');
+        }, 2000);
+      });
     });
+  }
+
+  function lobbyIdFromUri(uri) {
+    var m = /^steam:\/\/joinlobby\/\d+\/(\d+)\/\d+/.exec(uri);
+    return m ? m[1] : '';
+  }
+
+  bindCopy(copyBtn, '复制邀请码', function () { return currentCode; });
+  bindCopy(copyLinkBtn, '复制加入链接', function () { return currentJoinUri; });
+  bindCopy(copyCmdBtn, '复制启动命令', function () {
+    var id = lobbyIdFromUri(currentJoinUri);
+    return id ? '+connect_lobby ' + id : '';
   });
 
   refresh();
